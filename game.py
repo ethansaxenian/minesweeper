@@ -106,7 +106,7 @@ def main():
             break
         else:
             make_move(move, board)
-            if move[0] == Action.UNCOVER and board.bomb(move[1:]):
+            if move[0] == Action.UNCOVER and board.is_bomb(move[1:]):
                 board.reveal_mines()
                 print('\nYou lose!')
                 break

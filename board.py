@@ -32,7 +32,7 @@ class Cell:
         self.adjacent_bombs = sum(1 for cell in self.adjacent_cells if cell.bomb)
 
     def adjacent_covered(self):
-        return [cell for cell in self.adjacent_cells if cell.state == CellState.COVERED]
+        return [cell for cell in self.adjacent_cells if cell.state != CellState.UNCOVERED]
 
     def uncover(self):
         self.state = CellState.UNCOVERED
@@ -59,13 +59,15 @@ class Board:
         self.width = self.WIDTH[difficulty]
         self.height = self.HEIGHT[difficulty]
         self._board: List[List[Cell]] = self.init_board()
+        self.bombs = set()
         self.add_bombs()
         self.set_adjacent_cells()
+        self.flagged_cells = set()
 
     def __repr__(self):
-        rep = '\t'
+        rep = ''
         for x in range(self.width):
-            rep += f'{x}\t'
+            rep += f'\t{x}'
         rep += '\n'
         for i in range(self.height):
             rep += f'{i}\t'
@@ -85,6 +87,7 @@ class Board:
         all_cells = list(itertools.chain.from_iterable(self._board))
         for cell in random.sample(all_cells, self.num_bombs):
             cell.bomb = True
+            self.bombs.add(cell)
 
     def set_adjacent_cells(self):
         for i in range(self.height):
@@ -95,24 +98,32 @@ class Board:
                         cell.adjacent_cells.append(self._board[i+dir[0]][j+dir[1]])
                 cell.count_adjacent_bombs()
 
-    def bomb(self, cell: Tuple[int, int]) -> bool:
+    def is_bomb(self, cell: Tuple[int, int]) -> bool:
         return self._board[cell[0]][cell[1]].bomb
 
     def uncover(self, row: int, col: int):
-        self._board[row][col].uncover()
+        cell = self._board[row][col]
+        cell.uncover()
+        if cell in self.flagged_cells:
+            self.flagged_cells.remove(cell)
 
     def valid_uncover(self, row: int, col: int) -> bool:
         return self._board[row][col].state != CellState.UNCOVERED
 
     def flag(self, row: int, col: int):
-        self._board[row][col].flag()
+        cell = self._board[row][col]
+        cell.flag()
+        self.flagged_cells.add(cell)
         self.covered_bombs -= 1
 
     def valid_flag(self, row: int, col: int) -> bool:
         return self._board[row][col].state == CellState.COVERED
 
     def unflag(self, row: int, col: int):
-        self._board[row][col].unflag()
+        cell = self._board[row][col]
+        cell.unflag()
+        if cell in self.flagged_cells:
+            self.flagged_cells.remove(cell)
         self.covered_bombs += 1
 
     def valid_unflag(self, row: int, col: int) -> bool:
@@ -137,4 +148,4 @@ class Board:
             for j in range(self.width):
                 if self._board[i][j].state == CellState.COVERED:
                     return False
-        return True
+        return self.flagged_cells == self.bombs
