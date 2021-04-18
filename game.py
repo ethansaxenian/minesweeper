@@ -93,7 +93,7 @@ def make_move(move: Tuple[Action, int, int], board: Board):
         board.unflag(row, col)
 
 
-def main():
+def play_game():
     print('Welcome to Minesweeper')
     difficulty = get_difficulty()
     board = Board(difficulty)
@@ -117,4 +117,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    play_game()
