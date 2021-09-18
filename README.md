@@ -1,6 +1,6 @@
 # Minesweeper
 
-This is a simple, test-based implementation of Minesweeper. 
+This is a simple, text-based implementation of Minesweeper. 
 
 
 *How to play:*  
